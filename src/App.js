@@ -1,25 +1,47 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from 'react';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+import Header from './components/Header';
+import WeatherStatusCard from './components/WeatherStatusCard';
+
+import { fetchData } from './api';
+
+const App = () => {
+    const [unit, setUnit] = useState('metric');
+    const [cityName, setCityName] = useState('New York');
+    const [weatherData, setWeatherData] = useState({ main: [], weather: [], wind: [], country: '', name: '', });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                setLoading(true);
+                const data = await fetchData(cityName, unit);
+                setWeatherData({
+                    main: data.main,
+                    name: data.name,
+                    wind: data.wind,
+                    weather: data.weather,
+                    country: data.sys.country
+                });
+                setLoading(false);
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        loadData();
+    }, [unit, cityName]);
+
+    return (
+        <div>
+            <Header />
+            <WeatherStatusCard
+                loading={loading}
+                weather={weatherData}
+                setUnit={setUnit}
+                setCityName={setCityName}
+            />
+        </div>
+    );
+};
 
 export default App;
